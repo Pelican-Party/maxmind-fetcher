@@ -3,6 +3,22 @@ import { Maxmind } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
 import type { MaxMindFetcherOptions } from "./MaxMindFetcher.ts";
 import type { CityResponse, PrefixResponse } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
 
+/**
+ * A `LiveMaxMindDb` builds on top of the `MaxMindFetcher`. Just like the fetcher, it also keeps a database
+ * up to date and writes it to disk. But in addition, it also loads the database into memory
+ * using @josh-hemphill/maxminddb-wasm.
+ *
+ * @example
+ * ```js
+ * const maxMind = new LiveMaxMindDb({
+ * 	editionId: "GeoLite2-Country",
+ * 	dbStorageDir: "/path/to/maxMind",
+ * 	maxMindLicenseKey: "<key>",
+ * });
+ *
+ * await maxMind.lookupCity("<ip>");
+ * ```
+ */
 export class LiveMaxMindDb {
 	#db: Maxmind | null = null;
 
@@ -12,23 +28,6 @@ export class LiveMaxMindDb {
 		this.#resolveInitialDbPromise = resolve;
 	});
 
-	/**
-	 * A `LiveMaxMindDb` builds on top of the `MaxMindFetcher`. Just like the fetcher, it also keeps a database
-	 * up to date and writes it to disk. But in addition, it also loads the database into memory
-	 * using @josh-hemphill/maxminddb-wasm.
-	 *
-	 * @example
-	 * ```js
-	 * const maxMind = new LiveMaxMindDb({
-	 * 	editionId: "GeoLite2-Country",
-	 * 	dbStorageDir: "/path/to/maxMind",
-	 * 	maxMindLicenseKey: "<key>",
-	 * });
-	 *
-	 * // maxMind.db
-	 * await maxMind.lookupCity("<ip>");
-	 * ```
-	 */
 	constructor(options: MaxMindFetcherOptions) {
 		this.#init(options);
 	}
@@ -58,10 +57,16 @@ export class LiveMaxMindDb {
 		}
 	}
 
+	/**
+	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_city
+	 */
 	async lookupCity(ipAddress: string): Promise<CityResponse> {
 		return (await this.#dbPromise).lookup_city(ipAddress);
 	}
 
+	/**
+	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_prefix
+	 */
 	async lookupPrefix(ipAddress: string): Promise<PrefixResponse> {
 		return (await this.#dbPromise).lookup_prefix(ipAddress);
 	}

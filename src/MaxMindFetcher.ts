@@ -280,6 +280,20 @@ class MaxMindFetcher {
 	}
 }
 
+/**
+ * Creates a MaxMindFetcher instance.
+ *
+ * @example
+ * ```ts
+ * const maxMindFetcher = await initMaxMindFetcher({
+ * 	editionId: "GeoLite2-Country",
+ * 	dbStorageDir: resolve("./path/to/maxmind"),
+ * 	maxMindLicenseKey: MAXMIND_LICENSE_KEY,
+ * });
+ *
+ * const db = await maxMindFetcher.getDbBuffer();
+ * ```
+ */
 export async function initMaxMindFetcher(options: MaxMindFetcherOptions): Promise<MaxMindFetcher> {
 	await fs.ensureDir(options.dbStorageDir);
 
