@@ -266,7 +266,7 @@ class MaxMindFetcher {
 	 * Reads the latest database buffer from disk.
 	 * Returns null if the database hasn't been downloaded yet.
 	 */
-	async getDbBuffer() {
+	async getDbBuffer(): Promise<Uint8Array | null> {
 		await this.#rewritePromise;
 		try {
 			return await Deno.readFile(this.#dbPath);
@@ -280,7 +280,7 @@ class MaxMindFetcher {
 	}
 }
 
-export async function initMaxMindFetcher(options: MaxMindFetcherOptions) {
+export async function initMaxMindFetcher(options: MaxMindFetcherOptions): Promise<MaxMindFetcher> {
 	await fs.ensureDir(options.dbStorageDir);
 
 	const fetcher = new MaxMindFetcher(options);

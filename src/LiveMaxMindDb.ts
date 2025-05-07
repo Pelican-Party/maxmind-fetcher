@@ -1,5 +1,7 @@
-import { initMaxMindFetcher, MaxMindFetcherOptions } from "./MaxMindFetcher.ts";
-import { Maxmind } from "jsr:@josh-hemphill/maxminddb-wasm";
+import { initMaxMindFetcher } from "./MaxMindFetcher.ts";
+import { Maxmind } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
+import type { MaxMindFetcherOptions } from "./MaxMindFetcher.ts";
+import type { CityResponse, PrefixResponse } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
 
 export class LiveMaxMindDb {
 	#db: Maxmind | null = null;
@@ -56,11 +58,11 @@ export class LiveMaxMindDb {
 		}
 	}
 
-	async lookupCity(ipAddress: string) {
+	async lookupCity(ipAddress: string): Promise<CityResponse> {
 		return (await this.#dbPromise).lookup_city(ipAddress);
 	}
 
-	async lookupPrefix(ipAddress: string) {
+	async lookupPrefix(ipAddress: string): Promise<PrefixResponse> {
 		return (await this.#dbPromise).lookup_prefix(ipAddress);
 	}
 }
