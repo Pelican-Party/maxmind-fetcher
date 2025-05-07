@@ -1,6 +1,6 @@
-import * as fs from "https://jsr.io/@std/fs/1.0.17/mod.ts";
-import * as stdPath from "https://jsr.io/@std/path/1.0.9/mod.ts";
-import { UntarStream } from "https://jsr.io/@std/tar/0.1.6/untar_stream.ts";
+import * as fs from "jsr:@std/fs@1.0.17";
+import * as stdPath from "jsr:@std/path@1.0.9";
+import { UntarStream } from "jsr:@std/tar@0.1.6";
 import { getSha256FromBuffer } from "./util.ts";
 
 type MaxMindEditionId =
