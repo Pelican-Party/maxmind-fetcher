@@ -1,7 +1,7 @@
 import { initMaxMindFetcher } from "./MaxMindFetcher.ts";
-import { Maxmind } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
+import { Maxmind } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.8";
 import type { MaxMindFetcherOptions } from "./MaxMindFetcher.ts";
-import type { CityResponse, PrefixResponse } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.1";
+import type { CityResponse, PrefixResponse } from "jsr:@josh-hemphill/maxminddb-wasm@2.1.8";
 
 /**
  * A `LiveMaxMindDb` builds on top of the `MaxMindFetcher`. Just like the fetcher, it also keeps a database
@@ -98,7 +98,7 @@ export class LiveMaxMindDb {
 	}
 
 	/**
-	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_city
+	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.8/doc/~/Maxmind.prototype.lookup_city
 	 */
 	async lookupCity(ipAddress: string): Promise<CityResponse> {
 		return await this.#useDb(async (db) => {
@@ -107,7 +107,7 @@ export class LiveMaxMindDb {
 	}
 
 	/**
-	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_prefix
+	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.8/doc/~/Maxmind.prototype.lookup_prefix
 	 */
 	async lookupPrefix(ipAddress: string): Promise<PrefixResponse> {
 		return await this.#useDb(async (db) => {
