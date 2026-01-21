@@ -52,7 +52,7 @@ export class LiveMaxMindDb {
 			if (pending > 0) {
 				this.#discardedDbs.add(this.#db);
 			} else {
-				this.#db.free();
+				this.#tryFreeDb(this.#db);
 			}
 		}
 
@@ -62,6 +62,15 @@ export class LiveMaxMindDb {
 			this.#initialPromiseResolved = true;
 		} else {
 			this.#dbPromise = Promise.resolve(this.#db);
+		}
+	}
+
+	#tryFreeDb(db: Maxmind) {
+		try {
+			db.free();
+		} catch (error) {
+			// This mainly exists to catch https://github.com/josh-hemphill/maxminddb-wasm/issues/10
+			console.error(error);
 		}
 	}
 
@@ -81,7 +90,7 @@ export class LiveMaxMindDb {
 			this.#pendingDbLookups.set(db, newPending);
 			if (newPending <= 0) {
 				if (this.#discardedDbs.has(db)) {
-					db.free();
+					this.#tryFreeDb(db);
 					this.#discardedDbs.delete(db);
 				}
 			}
