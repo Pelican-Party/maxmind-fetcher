@@ -28,6 +28,9 @@ export class LiveMaxMindDb {
 		this.#resolveInitialDbPromise = resolve;
 	});
 
+	#pendingDbLookups = new WeakMap<Maxmind, number>();
+	#discardedDbs = new Set<Maxmind>();
+
 	constructor(options: MaxMindFetcherOptions) {
 		this.#init(options);
 	}
@@ -45,7 +48,12 @@ export class LiveMaxMindDb {
 
 	#loadDb(dbBuffer: Uint8Array) {
 		if (this.#db) {
-			this.#db.free();
+			const pending = this.#pendingDbLookups.get(this.#db) || 0;
+			if (pending > 0) {
+				this.#discardedDbs.add(this.#db);
+			} else {
+				this.#db.free();
+			}
 		}
 
 		this.#db = new Maxmind(dbBuffer);
@@ -58,16 +66,43 @@ export class LiveMaxMindDb {
 	}
 
 	/**
+	 * Runs an async function and keeps track of when it resolves.
+	 * This is used to clean up old Maxmind database instances once all uses have resolved.
+	 */
+	async #useDb<T>(fn: (db: Maxmind) => Promise<T>): Promise<T> {
+		const db = await this.#dbPromise;
+		const pending = this.#pendingDbLookups.get(db) || 0;
+		this.#pendingDbLookups.set(db, pending + 1);
+		try {
+			return await fn(db);
+		} finally {
+			const pending = this.#pendingDbLookups.get(db) || 0;
+			const newPending = pending - 1;
+			this.#pendingDbLookups.set(db, newPending);
+			if (newPending <= 0) {
+				if (this.#discardedDbs.has(db)) {
+					db.free();
+					this.#discardedDbs.delete(db);
+				}
+			}
+		}
+	}
+
+	/**
 	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_city
 	 */
 	async lookupCity(ipAddress: string): Promise<CityResponse> {
-		return (await this.#dbPromise).lookup_city(ipAddress);
+		return await this.#useDb(async (db) => {
+			return await db.lookup_city(ipAddress);
+		});
 	}
 
 	/**
 	 * See https://jsr.io/@josh-hemphill/maxminddb-wasm@2.1.1/doc/~/Maxmind.prototype.lookup_prefix
 	 */
 	async lookupPrefix(ipAddress: string): Promise<PrefixResponse> {
-		return (await this.#dbPromise).lookup_prefix(ipAddress);
+		return await this.#useDb(async (db) => {
+			return await db.lookup_prefix(ipAddress);
+		});
 	}
 }
